@@ -7,13 +7,13 @@ bio: Welcome to my page!
 
 # if it's an external image, update below for true
 # better with square images
-external-image: false
+external-image: true
 picture: assets/images/profile.jpg
 
 # If you want to include your resume, set to true
 # and specify source (external or local).
 resume: true
-resume-external: false
+resume-external: true
 resume-url: assets/resume/resume.pdf
 
 url: https://dongjoban17.github.io
@@ -50,7 +50,7 @@ authors:
     dongjo:
         name: Dongjo Ban
         bio: An aspiring bioinformatician
-        external-image: false
+        external-image: true
         picture: assets/images/profile.jpg
 
 # do you want a larger site? change the option below
