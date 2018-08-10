@@ -1,19 +1,19 @@
 # main text of home
 name: Dongjo Ban
-bio: (Luckily|Unfortunately), learning never stops 
+bio: Welcome to my page!
 
 # twitter summary info
 # description: A blog about technology and stuff related
 
 # if it's an external image, update below for true
 # better with square images
-external-image: true
+external-image: false
 picture: assets/images/profile.jpg
 
 # If you want to include your resume, set to true
 # and specify source (external or local).
 resume: true
-resume-external: true
+resume-external: false
 resume-url: assets/resume/resume.pdf
 
 url: https://dongjoban17.github.io
@@ -47,18 +47,11 @@ linkedin: dongjoban
 email: dongjoban17@gmail.com
 
 authors:
-    johndoe:
-        name: John Doe
-        bio: A Man who travels the world eating noodles
+    dongjo:
+        name: Dongjo Ban
+        bio: An aspiring bioinformatician
         external-image: false
         picture: assets/images/profile.jpg
-        twitter: johndoe
-    jamesfoster:
-        name: James Foster
-        bio: A Man who develops software with coffee
-        external-image: false
-        picture: assets/images/james.jpg
-        twitter: jamesfoster
 
 # do you want a larger site? change the option below
 # options: [normal, large] | default: normal
@@ -69,9 +62,9 @@ width: large
 # paginate: 5
 # paginate_path: "blog/:num/"
 
-projects: true
+#projects: true
 about: true
-# blog: true
+blog: true
 
 # show the "read time" of the posts?
 read-time: false
@@ -80,7 +73,7 @@ read-time: false
 show-tags: true
 
 # related posts inside a post?
-related: true
+related: false
 
 # Display links for next and previous posts for the specified categories
 post-advance-links: [blog]

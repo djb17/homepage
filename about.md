@@ -4,43 +4,23 @@ layout: page
 ---
 ![Profile Image]({{ site.url }}/{{ site.picture }})
 
-<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
-tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
-consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
-cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
-proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+<h2>About Me</h2>
 
-<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
-tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
-consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
-cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
-proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+<p>Choosing an effective therapeutic options for any disease first requires a thorough understanding of the disease itself. The complex nature of cancer still challenges us today even with the significant advancements in the field of oncology over the years. I'm Dongjo and my research interest mainly involves computational analysis of genomic data (next-generation sequencing, etc...) and other biological data in order to better comprehend and to provide novel treatment options for cancer.</p>
 
 <h2>Skills</h2>
 
 <ul class="skill-list">
-	<li>HTML - Jade - Haml - Erb</li>
-	<li>Responsive (Mobile First)</li>
-	<li>CSS (Stylus, Sass, Less)</li>
-	<li>Css Frameworks (Bootstrap, Foundation)</li>
-	<li>Javascript (Design Patterns, Testes)</li>
-	<li>NodeJS</li>
-	<li>AngularJS - ReactJS</li>
-	<li>Grunt - Gulp - Yeoman</li>
-	<li>Git</li>
-	<li>PHP</li>
-	<li>Python</li>
-	<li>MySQL - MongoDB</li>
-	<li>Scrum and Kanban</li>
-	<li>TDD e Continuous Integration</li>
+	<li>Programming - Mainly Python, R, Bash</li>
+	<li>Working in Unix/Linux environment</li>
+	<li>Analyzing next-generation sequencing (NGS) data</li>
+	<p>Check out my <a href="/assets/resume/resume.pdf">resume</a> for more details on my skills and relevant experiences</p>
 </ul>
 
-<h2>Projects</h2>
+<h2>Other Interests</h2>
 
-<ul>
-	<li><a href="https://github.com/">Lorem Lorem</a></li>
-	<li><a href="https://github.com/">Ipsum Dolor</a></li>
-	<li><a href="https://github.com/">Dolor Lorem</a></li>
-</ul>
+<ul class="skill-list">
+	<li>FOOD - Always welcoming recommendations</li>
+	<li>Traveling & Hiking</li>
+	<li>Occasional Photoshopping</li>
+<ul class="skill-list">
