@@ -10,16 +10,20 @@
                 <img class="selfie" alt="{{ site.name }}" src="{% if site.external-image %}{{ site.picture }}{% else %}{{ site.url }}/{{ site.picture }}{% endif %}" />
             </a>
         {% else %}
-            <span class="link">
+            <a class="link">
                 <img class="selfie" alt="{{ site.name }}" src="{% if site.external-image %}{{ site.picture }}{% else %}{{ site.url }}/{{ site.picture }}{% endif %}" />
-            </span>        
+            </a>        
         {% endif %}
 
-        <h1 class="title">{{ site.name }}</h1>
-        <h2 class="description">
-            <span style="color:#727272;">{{ site.bio }}</span><span class="blinking">|</span>
-        </h2>
-    
+        {% if page.title == "Blog" %}
+            <h1 class="title">Dongjo's Notes</h1>
+            <h2 class="description" style="color:#727272;">Things I may refer back to in the future...<span class="blinking">|</span></h2>
+        {% else %}
+            <h1 class="title">{{ site.name }}</h1>
+            <h2 class="description">
+                <span style="color:#727272;">{{ site.bio }}</span><span class="blinking">|</span>
+            </h2>
+        {% endif %}    
         {% include social-links.html %}
     </header>
 {% endif %}
