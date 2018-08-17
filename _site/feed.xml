@@ -1,67 +1,201 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.3">Jekyll</generator><link href="https://dongjoban17.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://dongjoban17.github.io/" rel="alternate" type="text/html" /><updated>2018-08-14T16:58:08-04:00</updated><id>https://dongjoban17.github.io/</id><title type="html">Dongjo Ban</title><entry><title type="html">Fixing ethernet connection on CentOS7 after installation</title><link href="https://dongjoban17.github.io/ethernet-fix-centos7/" rel="alternate" type="text/html" title="Fixing ethernet connection on CentOS7 after installation" /><published>2018-02-08T00:00:00-05:00</published><updated>2018-02-08T00:00:00-05:00</updated><id>https://dongjoban17.github.io/ethernet-fix-centos7</id><content type="html" xml:base="https://dongjoban17.github.io/ethernet-fix-centos7/">&lt;h2 id=&quot;solution-worked-when-the-issue-was-encountered&quot;&gt;Solution (worked when the issue was encountered)&lt;/h2&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.3">Jekyll</generator><link href="https://dongjoban17.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://dongjoban17.github.io/" rel="alternate" type="text/html" /><updated>2018-08-16T22:05:31-04:00</updated><id>https://dongjoban17.github.io/</id><title type="html">Dongjo Ban</title><entry><title type="html">Checking whether reads in BAM are paired-end</title><link href="https://dongjoban17.github.io/check-single-end-bam/" rel="alternate" type="text/html" title="Checking whether reads in BAM are paired-end" /><published>2018-08-02T00:00:00-04:00</published><updated>2018-08-02T00:00:00-04:00</updated><id>https://dongjoban17.github.io/check-single-end-bam</id><content type="html" xml:base="https://dongjoban17.github.io/check-single-end-bam/">&lt;h2 id=&quot;background&quot;&gt;Background&lt;/h2&gt;
+
+&lt;p&gt;While examining BAM files generated from a couple years back, I wanted to see if the reads that were aligned to the reference genome was paired-end reads. With some help from &lt;a href=&quot;https://www.biostars.org/&quot; target=&quot;_blank&quot;&gt;Biostars&lt;/a&gt; community, I was able to declare that the reads were actually single-end reads.&lt;/p&gt;
+
+&lt;p&gt;Note: The reads were from Ion Torrent sequencing machine and they are mostly single-end (found this out a little after checking with below approaches).&lt;/p&gt;
+
+&lt;h2 id=&quot;approaches&quot;&gt;Approaches&lt;/h2&gt;
+
+&lt;h3 id=&quot;attempt-to-gather-information-from-header&quot;&gt;Attempt to gather information from header&lt;/h3&gt;
+
+&lt;p&gt;@PG of header may contain command line prompt (e.g. CL: XXX) used to generate the .BAM file&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;c&quot;&gt;# Retrieve header information using samtools&lt;/span&gt;
+
+samtools view &lt;span class=&quot;nt&quot;&gt;-H&lt;/span&gt; &amp;lt;input-bam-file&amp;gt; | &lt;span class=&quot;nb&quot;&gt;grep&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;@PG&quot;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;If we observe useful information, we could stop here. If not, we can proceed to check the bitwise flag for each read in .BAM file.&lt;/p&gt;
+
+&lt;h3 id=&quot;examine-the-bitwise-flags&quot;&gt;Examine the bitwise flags&lt;/h3&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;c&quot;&gt;# Bitwise flags can be found in the 2nd column in SAM&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;# Sort and count the number of each bitwise flags present&lt;/span&gt;
+
+samtools view &amp;lt;input-bam-file&amp;gt; | cut &lt;span class=&quot;nt&quot;&gt;-f2&lt;/span&gt; | sort | uniq &lt;span class=&quot;nt&quot;&gt;-c&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;If the input .fastq file(s) was/were indeed paired-end data, then we should be observing high number of bitwise flags 99 or 147. For bitwise flags and their meanings, refer to this &lt;a href=&quot;https://broadinstitute.github.io/picard/explain-flags.html&quot; target=&quot;_blank&quot;&gt;resource&lt;/a&gt; from Broad Institute.&lt;/p&gt;
+
+&lt;h3 id=&quot;additional-options&quot;&gt;Additional options&lt;/h3&gt;
+
+&lt;p&gt;If .BAM was generated from single-end reads, the below line should output 0.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;c&quot;&gt;# -c option will return the count of matching records specified by -f option.&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;# '-f 1' refers to reads having bitwise flag of 1&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;# bitwise flag 1 == paired-end&lt;/span&gt;
+
+samtools view &lt;span class=&quot;nt&quot;&gt;-c&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-f&lt;/span&gt; 1 &amp;lt;input-bam-file&amp;gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;If all of above options don’t work for some reason or you want to examine each reads in .BAM on your own:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;samtools sort &lt;span class=&quot;nt&quot;&gt;-n&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-o&lt;/span&gt; &amp;lt;output-sorted-bam-file&amp;gt; &amp;lt;input-bam-file&amp;gt;
+samtools view &amp;lt;output-sorted-bam-file&amp;gt; | head &lt;span class=&quot;nt&quot;&gt;-n&lt;/span&gt; &amp;lt;num-lines&amp;gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;</content><author><name>dongjo</name></author><category term="blog" /><category term="bioinformatics" /><category term="samtools" /><category term="ngs" /><summary type="html">Background</summary></entry><entry><title type="html">Establishing presence of rRNA contamination - a bioinformatics approach</title><link href="https://dongjoban17.github.io/rrna-contamination-check/" rel="alternate" type="text/html" title="Establishing presence of rRNA contamination - a bioinformatics approach" /><published>2018-07-10T00:00:00-04:00</published><updated>2018-07-10T00:00:00-04:00</updated><id>https://dongjoban17.github.io/rrna-contamination-check</id><content type="html" xml:base="https://dongjoban17.github.io/rrna-contamination-check/">&lt;h2 id=&quot;background&quot;&gt;Background&lt;/h2&gt;
+
+&lt;div&gt;
+	&lt;center&gt;
+		&lt;img src=&quot;https://dongjoban17.github.io/assets/images/blog/rRNA_contamination_example.PNG&quot; width=&quot;60%&quot; /&gt;
+	&lt;/center&gt;
+&lt;/div&gt;
+&lt;p&gt;Notice anything strange about per sequence GC content distribution from FastQC? This plot was taken from a FastQC results for RNA-Seq data. From exploring on multiple sources, I narrowed down the possible reasons for GC count per read not following the theoretical distribution and the resulting two peaks:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Sequencing quality is poor&lt;/li&gt;
+  &lt;li&gt;Contamination (rRNA, adapters, exogenous sequences)&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;There was no problem with the sequencing quality as quality scores across all bases seemed to be good (&amp;gt; Phred score of 28). I attempted to align the data (using STAR2) and observed a very low % of uniquely mapped reads and relatively high %’s of reads mapping to multiple loci and unmapped reads.&lt;/p&gt;
+
+&lt;p&gt;After spending more time on Google, I found two approaches that will help me determine whether there is rRNA contamination in the sample.&lt;/p&gt;
+
+&lt;p&gt;In order to make sure that below approaches were working correctly, I downloaded RNA-Seq data for a cell line from GDC’s legacy repository as a control and tested them. The results for our control showed that no contamination was present. However, the results for the sample that I was initially analyzing displayed presence of rRNA contamination.&lt;/p&gt;
+
+&lt;h2 id=&quot;approaches&quot;&gt;Approaches&lt;/h2&gt;
+
+&lt;h3 id=&quot;align-rna-seq-reads-to-rrna-sequences&quot;&gt;Align RNA-Seq reads to rRNA sequences&lt;/h3&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;
+    &lt;p&gt;Download rRNA sequences from &lt;a href=&quot;https://drive.google.com/file/d/0BweZVB8jfIwPRmt4T2FCRHdzdTg/view?usp=sharing&quot;&gt;here&lt;/a&gt;. (Thank you &lt;a href=&quot;http://genomespot.blogspot.com&quot;&gt;Genome Spot&lt;/a&gt;)&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Use an aligner to map the RNA-Seq reads to the rRNA sequences. BWA will suffice.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Check resulting SAM/BAM’s alignment statistics with samtools flagstat.&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h3 id=&quot;rseqc&quot;&gt;RSeQC&lt;/h3&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;
+    &lt;p&gt;Map/Align RNA-Seq reads to a reference.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Download human rRNA bed file from &lt;a href=&quot;https://sites.google.com/site/liguowangspublicsite/home/hg19_rRNA.bed&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;. You may need to perform liftover to hg38.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Run split_bam.py. Please refer to usage &lt;a href=&quot;http://dldcc-web.brc.bcm.edu/lilab/liguow/CGI/rseqc/_build/html/index.html#spilt-bam-py&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;The idea here for RSeQC is that you examine the number of reads falling within the regions that correspond to rRNA specified in the .bed file.&lt;/p&gt;
+
+&lt;h2 id=&quot;references&quot;&gt;References&lt;/h2&gt;
+
+&lt;p&gt;STAR2 &lt;a href=&quot;https://groups.google.com/forum/#!forum/rna-star&quot; target=&quot;_blank&quot;&gt;Google Group&lt;/a&gt;, &lt;a href=&quot;http://genomespot.blogspot.com/2015/08/screen-for-rrna-contamination-in-rna.html&quot; target=&quot;_blank&quot;&gt;Blog #1&lt;/a&gt;, &lt;a href=&quot;http://rseqc.sourceforge.net/&quot; target=&quot;_blank&quot;&gt;RSeQC&lt;/a&gt;&lt;/p&gt;</content><author><name>dongjo</name></author><category term="blog" /><category term="bioinformatics" /><category term="fastqc" /><category term="ngs" /><category term="rna-seq" /><category term="bwa" /><category term="rseqc" /><summary type="html">Background</summary></entry><entry><title type="html">Closing multiple screen sessions with similar names</title><link href="https://dongjoban17.github.io/close-screen-similar-names/" rel="alternate" type="text/html" title="Closing multiple screen sessions with similar names" /><published>2018-07-02T00:00:00-04:00</published><updated>2018-07-02T00:00:00-04:00</updated><id>https://dongjoban17.github.io/close-screen-similar-names</id><content type="html" xml:base="https://dongjoban17.github.io/close-screen-similar-names/">&lt;h2 id=&quot;background&quot;&gt;Background&lt;/h2&gt;
+
+&lt;p&gt;Wanted to kill some, but not all sessions of screen. The ones that I wanted to kill happened to have similar names designated with -S option.&lt;/p&gt;
+
+&lt;h2 id=&quot;solution&quot;&gt;Solution&lt;/h2&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;c&quot;&gt;# 1. Retrieve all screen sessions&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;# 2. Use 'grep' to retrieve only desired sessions&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;# 3. Use 'awk' to print only the session names&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;# 4. Use 'xargs' to kill the screen with the names from 'awk'&lt;/span&gt;
+
+screen &lt;span class=&quot;nt&quot;&gt;-ls&lt;/span&gt; |&lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+&lt;span class=&quot;nb&quot;&gt;grep&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-e&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'&amp;lt;insert-pattern-here&amp;gt;'&lt;/span&gt; |&lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+awk &lt;span class=&quot;s1&quot;&gt;'print $1'&lt;/span&gt; |&lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+xargs &lt;span class=&quot;nt&quot;&gt;-I&lt;/span&gt; % screen &lt;span class=&quot;nt&quot;&gt;-X&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-S&lt;/span&gt; % &lt;span class=&quot;nb&quot;&gt;kill&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;</content><author><name>dongjo</name></author><category term="blog" /><category term="xargs" /><category term="screen" /><category term="linux" /><category term="grep" /><category term="awk" /><summary type="html">Background</summary></entry><entry><title type="html">Replace ^M carriage character with a newline using sed</title><link href="https://dongjoban17.github.io/remove-window-carriage-return/" rel="alternate" type="text/html" title="Replace ^M carriage character with a newline using sed" /><published>2018-06-23T00:00:00-04:00</published><updated>2018-06-23T00:00:00-04:00</updated><id>https://dongjoban17.github.io/remove-window-carriage-return</id><content type="html" xml:base="https://dongjoban17.github.io/remove-window-carriage-return/">&lt;h2 id=&quot;background&quot;&gt;Background&lt;/h2&gt;
+
+&lt;p&gt;Sometimes files contain DOS/Windows carriage return which is annoying when attempting to parse them. If newline isn’t being parsed correctly, try the following solution.&lt;/p&gt;
+
+&lt;h2 id=&quot;solution&quot;&gt;Solution&lt;/h2&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;c&quot;&gt;# To insert the carriage character, press ctrl+v followed by ctrl+m&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;# -i option to perform in-place editing&lt;/span&gt;
+sed &lt;span class=&quot;nt&quot;&gt;-i&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'s/^M/\n/g'&lt;/span&gt; &amp;lt;filename&amp;gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;</content><author><name>dongjo</name></author><category term="blog" /><category term="sed" /><category term="linux" /><summary type="html">Background</summary></entry><entry><title type="html">Troubleshooting gzopen64 error during bedtools installation</title><link href="https://dongjoban17.github.io/bedtools-gzopen64-error/" rel="alternate" type="text/html" title="Troubleshooting gzopen64 error during bedtools installation" /><published>2018-06-13T00:00:00-04:00</published><updated>2018-06-13T00:00:00-04:00</updated><id>https://dongjoban17.github.io/bedtools-gzopen64-error</id><content type="html" xml:base="https://dongjoban17.github.io/bedtools-gzopen64-error/">&lt;h2 id=&quot;background&quot;&gt;Background&lt;/h2&gt;
+
+&lt;p&gt;Issue encountered when attempting to install bedtools without root privileges on lab server. In my specific case, this was due to LD_LIBRARY_PATH being defined in .bashrc (pointing to my local libraries instead of system’s libraries).&lt;/p&gt;
+
+&lt;h2 id=&quot;solution-worked-when-the-issue-was-encountered&quot;&gt;Solution (worked when the issue was encountered)&lt;/h2&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Find where files that have ‘libz.so’ as part of their name.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;locate libz.so.&lt;span class=&quot;k&quot;&gt;*&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;ol start=&quot;2&quot;&gt;
+  &lt;li&gt;In ‘Makefile’, find the following line:&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;...
+&lt;span class=&quot;nb&quot;&gt;export &lt;/span&gt;LIBS &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-lz&lt;/span&gt;
+...&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;ol start=&quot;3&quot;&gt;
+  &lt;li&gt;Change the line found in step 2 to the following:&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;...
+&lt;span class=&quot;nb&quot;&gt;export &lt;/span&gt;LIBS &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &amp;lt;path-found-from-step-1&amp;gt; &lt;span class=&quot;nt&quot;&gt;-lz&lt;/span&gt;
+...&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;ol start=&quot;4&quot;&gt;
+  &lt;li&gt;Re-compile bedtools.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;make clean &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; make&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;h2 id=&quot;related-reference&quot;&gt;Related Reference&lt;/h2&gt;
+
+&lt;p&gt;Similar troubleshooting post discussed in &lt;a href=&quot;https://groups.google.com/forum/#!topic/bedtools-discuss/sbJNxy3duXY&quot; target=&quot;_blank&quot;&gt;Google Groups&lt;/a&gt;.&lt;/p&gt;</content><author><name>dongjo</name></author><category term="blog" /><category term="installation" /><category term="troubleshooting" /><category term="bedtools" /><summary type="html">Background</summary></entry><entry><title type="html">Using Terminal within Sublime Text3 (TerminalView)</title><link href="https://dongjoban17.github.io/terminal-in-sublime3/" rel="alternate" type="text/html" title="Using Terminal within Sublime Text3 (TerminalView)" /><published>2018-06-11T00:00:00-04:00</published><updated>2018-06-11T00:00:00-04:00</updated><id>https://dongjoban17.github.io/terminal-in-sublime3</id><content type="html" xml:base="https://dongjoban17.github.io/terminal-in-sublime3/">&lt;h2 id=&quot;background&quot;&gt;Background&lt;/h2&gt;
+
+&lt;p&gt;Possible setup for linux environment in the future. Works and could be useful.&lt;/p&gt;
+
+&lt;h2 id=&quot;instructions&quot;&gt;Instructions&lt;/h2&gt;
+
+&lt;p&gt;Refer to TerminalView’s &lt;a href=&quot;https://github.com/Wramberg/TerminalView&quot;&gt;github page&lt;/a&gt; for installation instructions and detailed documentation.&lt;/p&gt;</content><author><name>dongjo</name></author><category term="blog" /><category term="sublime" /><category term="terminal" /><category term="linux" /><summary type="html">Background</summary></entry><entry><title type="html">Examining average read length with awk in .fastq file</title><link href="https://dongjoban17.github.io/examine-average-read-length-fastq/" rel="alternate" type="text/html" title="Examining average read length with awk in .fastq file" /><published>2018-06-01T00:00:00-04:00</published><updated>2018-06-01T00:00:00-04:00</updated><id>https://dongjoban17.github.io/examine-average-read-length-fastq</id><content type="html" xml:base="https://dongjoban17.github.io/examine-average-read-length-fastq/">&lt;h2 id=&quot;background&quot;&gt;Background&lt;/h2&gt;
+
+&lt;p&gt;Utilizing format of .fastq files, specifically 2nd line for each read entry which contains raw sequence, to calculate the average length of the reads.&lt;/p&gt;
+
+&lt;h2 id=&quot;approach&quot;&gt;Approach&lt;/h2&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;c&quot;&gt;# Initialize 'total' to keep track of total length of reads in .fastq&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;# 'count' will keep track of number of reads in .fastq&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;# Compute the length of the raw sequence and add it to the current total length&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;# Divide the total length by the number of reads to get the average read length.&lt;/span&gt;
+
+awk &lt;span class=&quot;s1&quot;&gt;'BEGIN{ total=0; count=0; } {if (NR%4==2) { total+=length($1); count++; }} END{ print(total/count) }'&lt;/span&gt; &amp;lt;fastq-filename&amp;gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;</content><author><name>dongjo</name></author><category term="blog" /><category term="bash" /><category term="linux" /><category term="bioinformatics" /><summary type="html">Background</summary></entry><entry><title type="html">A quick check for Phred score encoding for a .fastq file</title><link href="https://dongjoban17.github.io/check-phred-score-encoding-fastq/" rel="alternate" type="text/html" title="A quick check for Phred score encoding for a .fastq file" /><published>2018-05-30T00:00:00-04:00</published><updated>2018-05-30T00:00:00-04:00</updated><id>https://dongjoban17.github.io/check-phred-score-encoding-fastq</id><content type="html" xml:base="https://dongjoban17.github.io/check-phred-score-encoding-fastq/">&lt;h2 id=&quot;background&quot;&gt;Background&lt;/h2&gt;
+
+&lt;p&gt;One of many ways of examining Phred score encoding for a .fastq file. The code below only checks to see if the encoding is Phred+33 (Sanger, Illumina 1.8+).&lt;/p&gt;
+
+&lt;h2 id=&quot;approach&quot;&gt;Approach&lt;/h2&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;c&quot;&gt;# Check every 4th line in the .fastq file&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;# Examine first 10,000 lines&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;# Look to see if ASCII characters that do not belong in Phred+33 encoding is present&lt;/span&gt;
+awk &lt;span class=&quot;s1&quot;&gt;'{ if (NR%4==0) print($0); }'&lt;/span&gt; &amp;lt;fastq-filename&amp;gt; |&lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+head &lt;span class=&quot;nt&quot;&gt;-n&lt;/span&gt; 10000 |&lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+&lt;span class=&quot;nb&quot;&gt;grep&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-E&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'([JKLMNOPQRSTUVWXYZ\^_\`abcdefghi]|\[|\])'&lt;/span&gt;
+
+&lt;span class=&quot;c&quot;&gt;# If any lines are returned, then the encoding is not in Phred+33.&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;</content><author><name>dongjo</name></author><category term="blog" /><category term="bash" /><category term="linux" /><category term="bioinformatics" /><summary type="html">Background</summary></entry><entry><title type="html">Oxide theme for zsh</title><link href="https://dongjoban17.github.io/zsh-oxide-theme/" rel="alternate" type="text/html" title="Oxide theme for zsh" /><published>2018-05-09T00:00:00-04:00</published><updated>2018-05-09T00:00:00-04:00</updated><id>https://dongjoban17.github.io/zsh-oxide-theme</id><content type="html" xml:base="https://dongjoban17.github.io/zsh-oxide-theme/">&lt;h2 id=&quot;background&quot;&gt;Background&lt;/h2&gt;
+
+&lt;p&gt;Things I’ll need to install “Oxide” theme for zsh.&lt;/p&gt;
+
+&lt;h2 id=&quot;instructions&quot;&gt;Instructions&lt;/h2&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;
+    &lt;p&gt;Find “Oxide” from &lt;a href=&quot;https://github.com/robbyrussell/oh-my-zsh/wiki/External-themes&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;“Roboto Mono” font required for the theme to work properly can be found &lt;a href=&quot;https://github.com/ryanoasis/nerd-fonts/blob/master/patched-fonts/RobotoMono/Light/complete/Roboto%20Mono%20Light%20Nerd%20Font%20Complete.ttf&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;</content><author><name>dongjo</name></author><category term="blog" /><category term="zsh" /><category term="terminal" /><summary type="html">Background</summary></entry><entry><title type="html">Fixing ethernet connection on CentOS7 after installation</title><link href="https://dongjoban17.github.io/ethernet-fix-centos7/" rel="alternate" type="text/html" title="Fixing ethernet connection on CentOS7 after installation" /><published>2018-02-08T00:00:00-05:00</published><updated>2018-02-08T00:00:00-05:00</updated><id>https://dongjoban17.github.io/ethernet-fix-centos7</id><content type="html" xml:base="https://dongjoban17.github.io/ethernet-fix-centos7/">&lt;h2 id=&quot;solution-worked-when-the-issue-was-encountered&quot;&gt;Solution (worked when the issue was encountered)&lt;/h2&gt;
 
 &lt;p&gt;ifcfg-etho0 may need to be changed using below commands&lt;/p&gt;
 
 &lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nb&quot;&gt;cd&lt;/span&gt; /etc/sysconfig/network-scripts
-sed &lt;span class=&quot;nt&quot;&gt;-i&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-e&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'s/^ONBOOT=&quot;no/ONBOOT=&quot;yes/'&lt;/span&gt; ifcfg-eth0 &lt;span class=&quot;c&quot;&gt;# change ONBOOT to yes in ifcfg-eth0&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;</content><author><name>dongjo</name></author><category term="blog" /><category term="CentOS" /><category term="Troubleshooting" /><summary type="html">Solution (worked when the issue was encountered)</summary></entry><entry><title type="html">Extracting even/odd rows/columns</title><link href="https://dongjoban17.github.io/r-extract-odd-even-rows/" rel="alternate" type="text/html" title="Extracting even/odd rows/columns" /><published>2018-02-04T00:00:00-05:00</published><updated>2018-02-04T00:00:00-05:00</updated><id>https://dongjoban17.github.io/r-extract-odd-even-rows</id><content type="html" xml:base="https://dongjoban17.github.io/r-extract-odd-even-rows/">&lt;h2 id=&quot;approach&quot;&gt;Approach&lt;/h2&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-r&quot; data-lang=&quot;r&quot;&gt;&lt;span class=&quot;c1&quot;&gt;# test: our dataframe&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-&lt;/span&gt;&lt;span class=&quot;c1&quot;&gt;# Use logical vectors to select even/odd rows.&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-
-&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;test&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;c&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;TRUE&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;FALSE&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;c1&quot;&gt;# will get you the odd rows&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;test&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;c&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;TRUE&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;FALSE&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)]&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;c1&quot;&gt;# will get you the odd columns&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-
-&lt;/span&gt;&lt;span class=&quot;c1&quot;&gt;# Placing '!' in front of logical vector results in odd -&amp;gt; even.&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-
-&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;test&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;!&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;c&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;TRUE&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;FALSE&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;c1&quot;&gt;# will get you the even rows&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;test&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;o&quot;&gt;!&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;c&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;TRUE&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;FALSE&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)]&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;c1&quot;&gt;# will get you the even columns&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-
-&lt;/span&gt;&lt;span class=&quot;c1&quot;&gt;# Every N-th columns/rows&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-
-&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;test&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;c&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;TRUE&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;rep&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;FALSE&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;N&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;c1&quot;&gt;# will get you the N-th rows&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;test&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;c&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;TRUE&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;rep&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;FALSE&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;N&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)]&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;c1&quot;&gt;# will get you the N-th columns&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;h2 id=&quot;sources&quot;&gt;Sources&lt;/h2&gt;
-&lt;p&gt;For more detailed explanation and other examples, refer to the original Stack Overflow post &lt;a href=&quot;https://stackoverflow.com/questions/24440258/selecting-multiple-odd-or-even-columns-rows-for-dataframe&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;</content><author><name>dongjo</name></author><category term="blog" /><category term="R" /><category term="selection" /><summary type="html">Approach</summary></entry><entry><title type="html">Reason for log2 transformation for microarray data before performing limma analysis</title><link href="https://dongjoban17.github.io/limma-microarray/" rel="alternate" type="text/html" title="Reason for log2 transformation for microarray data before performing limma analysis" /><published>2018-01-13T00:00:00-05:00</published><updated>2018-01-13T00:00:00-05:00</updated><id>https://dongjoban17.github.io/limma-microarray</id><content type="html" xml:base="https://dongjoban17.github.io/limma-microarray/">&lt;h2 id=&quot;background&quot;&gt;Background&lt;/h2&gt;
-
-&lt;p&gt;&lt;a href=&quot;https://stackoverflow.com/questions/16864941/python-count-items-in-dict-value-that-is-a-list&quot; target=&quot;_blank&quot;&gt;limma&lt;/a&gt; for microarray analysis&lt;/p&gt;
-
-&lt;h2 id=&quot;explanation-from-the-documentation&quot;&gt;Explanation from the documentation&lt;/h2&gt;
-
-&lt;p&gt;“…expression values are more nearly normally distributed and homoscedastic on the log-scale, hence taking means on the log-scale is &lt;u&gt;statistically more powerful and less influenced by individual arrays&lt;/u&gt;.”&lt;/p&gt;
-
-&lt;p&gt;Homoscedatic: having similar variance between samples from the regression line.&lt;/p&gt;</content><author><name>dongjo</name></author><category term="blog" /><category term="limma" /><category term="microarray" /><category term="R" /><summary type="html">Background</summary></entry><entry><title type="html">Merging development branch with master branch</title><link href="https://dongjoban17.github.io/git-merging-master-dev/" rel="alternate" type="text/html" title="Merging development branch with master branch" /><published>2017-12-18T00:00:00-05:00</published><updated>2017-12-18T00:00:00-05:00</updated><id>https://dongjoban17.github.io/git-merging-master-dev</id><content type="html" xml:base="https://dongjoban17.github.io/git-merging-master-dev/">&lt;h2 id=&quot;background&quot;&gt;Background&lt;/h2&gt;
-
-&lt;p&gt;Just a simple note-to-self so I don’t forget.&lt;/p&gt;
-
-&lt;h2 id=&quot;approach&quot;&gt;Approach&lt;/h2&gt;
-
-&lt;ol&gt;
-  &lt;li&gt;Merge the master branch with development branch to resolve any merge conflicts
-    &lt;ul&gt;
-      &lt;li&gt;i.e. master –&amp;gt; dev&lt;/li&gt;
-      &lt;li&gt;This will help in keeping the master branch clean.&lt;/li&gt;
-    &lt;/ul&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;Fix merge conflicts (if there are any).&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;Merge development branch with the master branch.
-    &lt;ul&gt;
-      &lt;li&gt;i.e. dev –&amp;gt; master&lt;/li&gt;
-    &lt;/ul&gt;
-  &lt;/li&gt;
-&lt;/ol&gt;</content><author><name>dongjo</name></author><category term="blog" /><category term="git" /><category term="version control" /><summary type="html">Background</summary></entry><entry><title type="html">Summing up length of each dictionary values</title><link href="https://dongjoban17.github.io/python-sum-dict-val/" rel="alternate" type="text/html" title="Summing up length of each dictionary values" /><published>2017-11-14T00:00:00-05:00</published><updated>2017-11-14T00:00:00-05:00</updated><id>https://dongjoban17.github.io/python-sum-dict-val</id><content type="html" xml:base="https://dongjoban17.github.io/python-sum-dict-val/">&lt;h2 id=&quot;background&quot;&gt;Background&lt;/h2&gt;
-
-&lt;p&gt;I was storing list of strings as a value to a key in dictionary and needed to sum up the counts of total number of elements in the lists for each key.&lt;/p&gt;
-
-&lt;h2 id=&quot;approach&quot;&gt;Approach&lt;/h2&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;&lt;span class=&quot;c&quot;&gt;# data: our dictionary&lt;/span&gt;
-&lt;span class=&quot;c&quot;&gt;# We iterate through the values of each key in dict with data.itervalues().&lt;/span&gt;
-&lt;span class=&quot;c&quot;&gt;# Then, we use sum to add up all the counts.&lt;/span&gt;
-
-&lt;span class=&quot;nb&quot;&gt;sum&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;len&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;itervalues&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;())&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;h2 id=&quot;sources&quot;&gt;Sources&lt;/h2&gt;
-&lt;p&gt;For more detailed explanation and examples, refer to the original Stack Overflow post &lt;a href=&quot;https://stackoverflow.com/questions/16864941/python-count-items-in-dict-value-that-is-a-list&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;</content><author><name>dongjo</name></author><category term="blog" /><category term="python" /><category term="dict" /><summary type="html">Background</summary></entry></feed>
+sed &lt;span class=&quot;nt&quot;&gt;-i&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-e&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'s/^ONBOOT=&quot;no/ONBOOT=&quot;yes/'&lt;/span&gt; ifcfg-eth0 &lt;span class=&quot;c&quot;&gt;# change ONBOOT to yes in ifcfg-eth0&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;</content><author><name>dongjo</name></author><category term="blog" /><category term="centOS" /><category term="troubleshooting" /><summary type="html">Solution (worked when the issue was encountered)</summary></entry></feed>

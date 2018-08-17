@@ -3,8 +3,8 @@ title: "Fixing ethernet connection on CentOS7 after installation"
 layout: post
 date: 2018-2-8
 tag:
-- CentOS
-- Troubleshooting
+- centOS
+- troubleshooting
 category: blog
 author: dongjo
 
